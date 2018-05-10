@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:drawable="@drawable/gradient_red_high"
+        android:duration="500" />
+    <item
+        android:drawable="@drawable/gradient_blue_high"
+        android:duration="500" />
+</animation-list>

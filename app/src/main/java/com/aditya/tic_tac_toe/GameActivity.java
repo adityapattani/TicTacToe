@@ -1,14 +1,18 @@
 package com.aditya.tic_tac_toe;
 
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener {
 
     ImageView image1, image2, image3, image4, image5, image6, image7, image8, image9;
+    ConstraintLayout background;
+
     int[][] gridArray = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
     int totalMoves = 0;
     int turn = 0;
@@ -26,6 +30,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         image7 = findViewById(R.id.img_grid_7);
         image8 = findViewById(R.id.img_grid_8);
         image9 = findViewById(R.id.img_grid_9);
+        background = findViewById(R.id.layout_bg_game);
 
         image1.setOnClickListener(this);
         image2.setOnClickListener(this);
@@ -122,6 +127,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             totalMoves += 1;
             checkGrid();
         } else {
+            image.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.shake));
             Toast.makeText(getApplicationContext(), "Invalid move", Toast.LENGTH_SHORT).show();
         }
     }
