@@ -1,21 +1,36 @@
 package com.aditya.tic_tac_toe;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.constraint.ConstraintLayout;
+import android.os.Handler;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.Random;
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener {
 
     ImageView image1, image2, image3, image4, image5, image6, image7, image8, image9;
-    ConstraintLayout background;
+    ImageButton replayBtn;
+    TextView turnTxt;
+    View bgRed, bgBlue;
 
     int[][] gridArray = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
     int totalMoves = 0;
     int turn = 0;
+
+    String player1 = "Player 1", player2 = "CPU";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +45,20 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         image7 = findViewById(R.id.img_grid_7);
         image8 = findViewById(R.id.img_grid_8);
         image9 = findViewById(R.id.img_grid_9);
-        background = findViewById(R.id.layout_bg_game);
+        turnTxt = findViewById(R.id.txt_turn_name);
+        replayBtn = findViewById(R.id.imgbtn_replay);
+        bgRed = findViewById(R.id.view_bg_red);
+        bgBlue = findViewById(R.id.view_bg_blue);
+
+        Intent intent = getIntent();
+        player1 = intent.getStringExtra("player1");
+        player2 = intent.getStringExtra("player2");
+
+        if (player2 == null) {
+            player2 = "CPU";
+        }
+        String turnStr = "Turn: " + player1;
+        turnTxt.setText(turnStr);
 
         image1.setOnClickListener(this);
         image2.setOnClickListener(this);
@@ -41,10 +69,18 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         image7.setOnClickListener(this);
         image8.setOnClickListener(this);
         image9.setOnClickListener(this);
+
+        replayBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resetGame();
+            }
+        });
     }
 
     @Override
     public void onClick(View view) {
+        Log.e("Turn", turn + " " + totalMoves);
         switch (view.getId()) {
             case R.id.img_grid_1:
                 processInput(0, 0, image1);
@@ -74,6 +110,44 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 processInput(2, 2, image9);
                 break;
         }
+    }
+
+    private void resetGame() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(GameActivity.this);
+        builder.setTitle("Confirm")
+                .setMessage("Restart game?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        gridArray = new int[][]{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+                        image1.setImageResource(R.drawable.ic_empty_cell);
+                        image2.setImageResource(R.drawable.ic_empty_cell);
+                        image3.setImageResource(R.drawable.ic_empty_cell);
+                        image4.setImageResource(R.drawable.ic_empty_cell);
+                        image5.setImageResource(R.drawable.ic_empty_cell);
+                        image6.setImageResource(R.drawable.ic_empty_cell);
+                        image7.setImageResource(R.drawable.ic_empty_cell);
+                        image8.setImageResource(R.drawable.ic_empty_cell);
+                        image9.setImageResource(R.drawable.ic_empty_cell);
+
+                        image1.setClickable(true);
+                        image2.setClickable(true);
+                        image3.setClickable(true);
+                        image4.setClickable(true);
+                        image5.setClickable(true);
+                        image6.setClickable(true);
+                        image7.setClickable(true);
+                        image8.setClickable(true);
+                        image9.setClickable(true);
+
+                        turn = 0;
+                        String turnStr = "Turn: " + player1;
+                        turnTxt.setText(turnStr);
+                        totalMoves = 0;
+                    }
+                })
+                .setNegativeButton("No", null);
+        builder.show();
     }
 
     private boolean checkDiagonals() {
@@ -125,6 +199,30 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             }
             turn += 1;
             totalMoves += 1;
+
+            if (turn % 2 == 0) {
+                crossFadeToRed();
+                String turnStr = "Turn: " + player1;
+                turnTxt.setText(turnStr);
+            } else {
+                crossFadeToBlue();
+                String turnStr = "Turn: " + player2;
+                turnTxt.setText(turnStr);
+                if (player2.equals("CPU") && !checkRows() && !checkDiagonals() && !checkColumns()) {
+                    Snackbar.make(replayBtn.getRootView(), "CPU is thinking", 1000).show();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            cpuMove();
+                            crossFadeToRed();
+                            String turnStr = "Turn: " + player1;
+                            turnTxt.setText(turnStr);
+                            turn += 1;
+                            totalMoves += 1;
+                        }
+                    }, 1000);
+                }
+            }
             checkGrid();
         } else {
             image.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.shake));
@@ -139,9 +237,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         }
         if (checkColumns() || checkDiagonals() || checkRows()) {
             if ((turn + 1) % 2 == 0) {
-                Toast.makeText(getApplicationContext(), "Player 1 wins", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), player1 + " wins", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(getApplicationContext(), "Player 2 wins", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), player2 + " wins", Toast.LENGTH_SHORT).show();
             }
             disableInput();
         }
@@ -157,5 +255,124 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         image7.setClickable(false);
         image8.setClickable(false);
         image9.setClickable(false);
+    }
+
+    private void crossFadeToBlue() {
+        bgBlue.setAlpha(0f);
+        bgBlue.setVisibility(View.VISIBLE);
+
+        bgBlue.animate()
+                .alpha(1f)
+                .setDuration(350)
+                .setListener(null);
+
+        bgRed.animate()
+                .alpha(0f)
+                .setDuration(500)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        bgRed.setVisibility(View.GONE);
+                    }
+                });
+    }
+
+    private void crossFadeToRed() {
+        bgRed.setAlpha(0f);
+        bgRed.setVisibility(View.VISIBLE);
+
+        bgRed.animate()
+                .alpha(1f)
+                .setDuration(350)
+                .setListener(null);
+
+        bgBlue.animate()
+                .alpha(0f)
+                .setDuration(500)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        bgBlue.setVisibility(View.GONE);
+                    }
+                });
+    }
+
+    private void cpuMove() {
+        Random random = new Random();
+
+        switch (random.nextInt(8)) {
+            case 0:
+                if (gridArray[0][0] == 0) {
+                    gridArray[0][0] = 2;
+                    image1.setImageResource(R.drawable.ic_circle);
+                } else {
+                    cpuMove();
+                }
+                break;
+            case 1:
+                if (gridArray[0][1] == 0) {
+                    gridArray[0][1] = 2;
+                    image2.setImageResource(R.drawable.ic_circle);
+                } else {
+                    cpuMove();
+                }
+                break;
+            case 2:
+                if (gridArray[0][2] == 0) {
+                    gridArray[0][2] = 2;
+                    image3.setImageResource(R.drawable.ic_circle);
+                } else {
+                    cpuMove();
+                }
+                break;
+            case 3:
+                if (gridArray[1][0] == 0) {
+                    gridArray[1][0] = 2;
+                    image4.setImageResource(R.drawable.ic_circle);
+                } else {
+                    cpuMove();
+                }
+                break;
+            case 4:
+                if (gridArray[1][1] == 0) {
+                    gridArray[1][1] = 2;
+                    image5.setImageResource(R.drawable.ic_circle);
+                } else {
+                    cpuMove();
+                }
+                break;
+            case 5:
+                if (gridArray[1][2] == 0) {
+                    gridArray[1][2] = 2;
+                    image6.setImageResource(R.drawable.ic_circle);
+                } else {
+                    cpuMove();
+                }
+                break;
+            case 6:
+                if (gridArray[2][0] == 0) {
+                    gridArray[2][0] = 2;
+                    image7.setImageResource(R.drawable.ic_circle);
+                } else {
+                    cpuMove();
+                }
+                break;
+            case 7:
+                if (gridArray[2][1] == 0) {
+                    gridArray[2][1] = 2;
+                    image8.setImageResource(R.drawable.ic_circle);
+                } else {
+                    cpuMove();
+                }
+                break;
+            case 8:
+                if (gridArray[2][2] == 0) {
+                    gridArray[2][2] = 2;
+                    image9.setImageResource(R.drawable.ic_circle);
+                } else {
+                    cpuMove();
+                }
+                break;
+        }
     }
 }

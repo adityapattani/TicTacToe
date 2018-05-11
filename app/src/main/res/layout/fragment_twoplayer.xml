@@ -4,6 +4,14 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/pattern"
+        android:clickable="false"
+        android:scaleType="centerCrop"
+        android:alpha="0.3" />
+
     <EditText
         android:id="@+id/edt_first_name"
         android:layout_width="160dp"
@@ -35,6 +43,7 @@
         android:inputType="textPersonName" />
 
     <Button
+        android:id="@+id/btn_double_begin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_button_begin"
