@@ -29,6 +29,8 @@ public class SinglePlayer extends Fragment {
                 String name = playerName.getText().toString().trim();
                 if(name.length() == 0) {
                     playerName.setError("Please provide a name");
+                } else if (name.toLowerCase().equals("cpu")) {
+                    playerName.setError("You cannot use this name");
                 } else {
                     Intent intent = new Intent(getActivity(), GameActivity.class);
                     intent.putExtra("player1", name);

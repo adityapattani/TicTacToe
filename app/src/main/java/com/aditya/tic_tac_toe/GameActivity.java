@@ -50,6 +50,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         bgRed = findViewById(R.id.view_bg_red);
         bgBlue = findViewById(R.id.view_bg_blue);
 
+        replayBtn.setVisibility(View.GONE);
+
         Intent intent = getIntent();
         player1 = intent.getStringExtra("player1");
         player2 = intent.getStringExtra("player2");
@@ -110,6 +112,51 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 processInput(2, 2, image9);
                 break;
         }
+        replayBtn.setVisibility(View.VISIBLE);
+    }
+
+    private void processInput(int row, int col, ImageView image) {
+        if (gridArray[row][col] == 0) {
+            if (turn % 2 == 0) {
+                image.setImageResource(R.drawable.ic_cross);
+                gridArray[row][col] = 1;
+            } else {
+                image.setImageResource(R.drawable.ic_circle);
+                gridArray[row][col] = 2;
+            }
+            turn += 1;
+            totalMoves += 1;
+
+            if (turn % 2 == 0) {
+                crossFadeToRed();
+                String turnStr = "Turn: " + player1;
+                turnTxt.setText(turnStr);
+            } else {
+                crossFadeToBlue();
+                String turnStr = "Turn: " + player2;
+                turnTxt.setText(turnStr);
+                if (player2.equals("CPU") && !checkRows() && !checkDiagonals() && !checkColumns()) {
+                    disableInput();
+                    Snackbar.make(replayBtn.getRootView(), "CPU is thinking", 1000).show();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            cpuMove();
+                            crossFadeToRed();
+                            String turnStr = "Turn: " + player1;
+                            turnTxt.setText(turnStr);
+                            turn += 1;
+                            totalMoves += 1;
+                            enableInput();
+                        }
+                    }, 1000);
+                }
+            }
+            checkGrid();
+        } else {
+            image.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.shake));
+            Toast.makeText(getApplicationContext(), "Invalid move", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void resetGame() {
@@ -130,15 +177,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                         image8.setImageResource(R.drawable.ic_empty_cell);
                         image9.setImageResource(R.drawable.ic_empty_cell);
 
-                        image1.setClickable(true);
-                        image2.setClickable(true);
-                        image3.setClickable(true);
-                        image4.setClickable(true);
-                        image5.setClickable(true);
-                        image6.setClickable(true);
-                        image7.setClickable(true);
-                        image8.setClickable(true);
-                        image9.setClickable(true);
+                        enableInput();
 
                         turn = 0;
                         String turnStr = "Turn: " + player1;
@@ -188,48 +227,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         return totalMoves != 9;
     }
 
-    private void processInput(int row, int col, ImageView image) {
-        if (gridArray[row][col] == 0) {
-            if (turn % 2 == 0) {
-                image.setImageResource(R.drawable.ic_cross);
-                gridArray[row][col] = 1;
-            } else {
-                image.setImageResource(R.drawable.ic_circle);
-                gridArray[row][col] = 2;
-            }
-            turn += 1;
-            totalMoves += 1;
-
-            if (turn % 2 == 0) {
-                crossFadeToRed();
-                String turnStr = "Turn: " + player1;
-                turnTxt.setText(turnStr);
-            } else {
-                crossFadeToBlue();
-                String turnStr = "Turn: " + player2;
-                turnTxt.setText(turnStr);
-                if (player2.equals("CPU") && !checkRows() && !checkDiagonals() && !checkColumns()) {
-                    Snackbar.make(replayBtn.getRootView(), "CPU is thinking", 1000).show();
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            cpuMove();
-                            crossFadeToRed();
-                            String turnStr = "Turn: " + player1;
-                            turnTxt.setText(turnStr);
-                            turn += 1;
-                            totalMoves += 1;
-                        }
-                    }, 1000);
-                }
-            }
-            checkGrid();
-        } else {
-            image.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.shake));
-            Toast.makeText(getApplicationContext(), "Invalid move", Toast.LENGTH_SHORT).show();
-        }
-    }
-
     private void checkGrid() {
         if (!isBoardFilled()) {
             Toast.makeText(getApplicationContext(), "Board filled up", Toast.LENGTH_SHORT).show();
@@ -255,6 +252,18 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         image7.setClickable(false);
         image8.setClickable(false);
         image9.setClickable(false);
+    }
+
+    private void enableInput() {
+        image1.setClickable(true);
+        image2.setClickable(true);
+        image3.setClickable(true);
+        image4.setClickable(true);
+        image5.setClickable(true);
+        image6.setClickable(true);
+        image7.setClickable(true);
+        image8.setClickable(true);
+        image9.setClickable(true);
     }
 
     private void crossFadeToBlue() {

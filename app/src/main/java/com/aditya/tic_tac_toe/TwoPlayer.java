@@ -37,11 +37,17 @@ public class TwoPlayer extends Fragment{
                 if(firstName.length() == 0) {
                     playerOneName.setError("Please provide a name");
                     flag1 = false;
+                } else if (firstName.toLowerCase().equals("cpu")) {
+                    playerTwoName.setError("You cannot use this name");
+                    flag1 = false;
                 } else {
                     flag1 = true;
                 }
                 if(secondName.length() == 0) {
                     playerTwoName.setError("Please provide a name");
+                    flag2 = false;
+                } else if (secondName.toLowerCase().equals("cpu")) {
+                    playerTwoName.setError("You cannot use this name");
                     flag2 = false;
                 } else {
                     flag2 = true;
