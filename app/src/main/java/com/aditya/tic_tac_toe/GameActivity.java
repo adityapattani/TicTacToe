@@ -374,5 +374,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
         }
+        if (checkColumns() || checkDiagonals() || checkRows()) {
+            disableInput();
+            Toast.makeText(getApplicationContext(), player2 + " wins", Toast.LENGTH_SHORT).show();
+        }
     }
 }
